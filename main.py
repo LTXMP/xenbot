@@ -61,11 +61,17 @@ keep_alive()  # ✅ start Flask first (keeps Render service awake)
 
 async def main():
     async with bot:
-        await load_cogs()       # loads all your cogs
-            try:
-        await bot.start(TOKEN)  # logs into Discord
-    except Exception as e:
-        print(f"❌ Discord login failed: {e}")
+        await load_cogs()
+        print("🚀 Attempting Discord login ...")
+
+        try:
+            await bot.start(TOKEN)
+        except discord.LoginFailure:
+            print("❌ Invalid Discord token or wrong environment variable name.")
+        except discord.HTTPException as e:
+            print(f"❌ Discord HTTP error: {e}")
+        except Exception as e:
+            print(f"❌ Unexpected Discord login error: {type(e).__name__} - {e}")
 
 
 # ----------------------------------------------------------
