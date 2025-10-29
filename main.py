@@ -1,32 +1,54 @@
-import os
 import discord
 from discord.ext import commands
+import os, asyncio
 from dotenv import load_dotenv
-from keep_alive import keep_alive  # Safe on Render; optional elsewhere
+from keep_alive import keep_alive
 
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 
-intents = discord.Intents.default()
-intents.members = True
-intents.message_content = True  # needed for prefix cmds + message listeners
+# 🔧 Change this to your server ID (right-click server → Copy ID)
+GUILD_ID = 1383030583839424584 # <--- 🔧 CHANGE THIS
 
-# Global prefix set to comma, plus slash commands
+intents = discord.Intents.all()
+
+# Supports slash + prefix commands
 bot = commands.Bot(command_prefix=",", intents=intents)
 
+# -----------------------------------------------------
+# Load all cogs (async-safe)
+# -----------------------------------------------------
+async def load_cogs():
+    for filename in os.listdir("./cogs"):
+        if filename.endswith(".py"):
+            try:
+                await bot.load_extension(f"cogs.{filename[:-3]}")
+                print(f"✅ Loaded cog: {filename}")
+            except Exception as e:
+                print(f"❌ Failed to load cog {filename}: {e}")
+
+# -----------------------------------------------------
+# On Ready Event
+# -----------------------------------------------------
 @bot.event
 async def on_ready():
     print(f"✅ Logged in as {bot.user} ({bot.user.id})")
-    await bot.tree.sync()
-    print("✅ Slash commands synced")
 
-# ---- Load cogs automatically ----
-for filename in os.listdir("./cogs"):
-    if filename.endswith(".py"):
-        bot.load_extension(f"cogs.{filename[:-3]}")
+    try:
+        guild = discord.Object(id=GUILD_ID)
+        synced = await bot.tree.sync(guild=guild)
+        print(f"✅ Slash commands synced to guild {GUILD_ID} ({len(synced)} cmds)")
+    except Exception as e:
+        print(f"⚠️ Slash command sync failed: {e}")
 
-# ---- Optional keep-alive web server (works fine on Render) ----
-keep_alive()
+# -----------------------------------------------------
+# Main async runner
+# -----------------------------------------------------
+async def main():
+    async with bot:
+        await load_cogs()
+        keep_alive()  # start the Flask server
+        await bot.start(TOKEN)
 
-# ---- Run the bot ----
-bot.run(TOKEN)
+if __name__ == "__main__":
+    asyncio.run(main())
