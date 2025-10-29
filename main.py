@@ -56,11 +56,13 @@ async def on_ready():
 # ----------------------------------------------------------
 # Main bot start
 # ----------------------------------------------------------
+keep_alive()  # ✅ start Flask first
+
 async def main():
     async with bot:
         await load_cogs()
-        keep_alive()  # Start Flask keep-alive web server for Render
         await bot.start(TOKEN)
+
 
 # ----------------------------------------------------------
 # Run bot
