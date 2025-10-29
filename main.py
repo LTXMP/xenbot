@@ -16,7 +16,7 @@ load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 
 # 🔧 CHANGE THIS to your Discord server ID
-GUILD_ID = 123456789012345678  # Replace with your actual server ID
+GUILD_ID = 1383030583839424584  # Replace with your actual server ID
 
 # ----------------------------------------------------------
 # Discord bot setup
