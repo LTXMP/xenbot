@@ -1,13 +1,13 @@
 # ==========================================================
-# XenBot Main File
+# XenBot Main File (Render-Ready)
 # ==========================================================
-
 import discord
 from discord.ext import commands
 import os
 import asyncio
 from dotenv import load_dotenv
 from keep_alive import keep_alive
+import threading
 
 # ----------------------------------------------------------
 # Load environment variables
@@ -23,14 +23,13 @@ GUILD_ID = 1383030583839424584  # Replace with your actual server ID
 # ----------------------------------------------------------
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix=",", intents=intents)
-bot.remove_command("help")  # Disable default help command so custom one works
+bot.remove_command("help")
 
 # ----------------------------------------------------------
-# Load all cogs (async-safe)
+# Load all cogs
 # ----------------------------------------------------------
 async def load_cogs():
     for filename in os.listdir("./cogs"):
-        # Skip helper files or non-Python files
         if not filename.endswith(".py") or filename.startswith("utils_"):
             continue
         try:
@@ -40,30 +39,33 @@ async def load_cogs():
             print(f"❌ Failed to load cog {filename}: {e}")
 
 # ----------------------------------------------------------
-# ----------------------------------------------------------
-# Event: Bot ready + Slash command sync
+# Bot Ready Event
 # ----------------------------------------------------------
 @bot.event
 async def on_ready():
     print(f"✅ Logged in as {bot.user} ({bot.user.id})")
-
     try:
         guild = discord.Object(id=GUILD_ID)
-        synced = await bot.tree.sync(guild=guild)  # Guild sync = instant
+        synced = await bot.tree.sync(guild=guild)
         print(f"✅ Slash commands synced to guild {GUILD_ID} ({len(synced)} cmds)")
     except Exception as e:
         print(f"⚠️ Slash command sync failed: {e}")
 
 # ----------------------------------------------------------
-# Main bot start
+# Run Flask in separate thread (so Render sees a port)
 # ----------------------------------------------------------
-keep_alive()  # ✅ start Flask first (keeps Render service awake)
+def run_flask():
+    keep_alive()
 
+threading.Thread(target=run_flask).start()
+
+# ----------------------------------------------------------
+# Start Discord bot
+# ----------------------------------------------------------
 async def main():
     async with bot:
         await load_cogs()
         print("🚀 Attempting Discord login ...")
-
         try:
             await bot.start(TOKEN)
         except discord.LoginFailure:
@@ -73,10 +75,5 @@ async def main():
         except Exception as e:
             print(f"❌ Unexpected Discord login error: {type(e).__name__} - {e}")
 
-
-# ----------------------------------------------------------
-# Run bot
-# ----------------------------------------------------------
 if __name__ == "__main__":
     asyncio.run(main())
-
