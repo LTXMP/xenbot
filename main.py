@@ -37,11 +37,16 @@ async def on_ready():
     print(f"✅ Logged in as {bot.user} ({bot.user.id})")
 
     try:
+        # Replace this with your actual Discord server ID (right-click server → Copy ID)
+        GUILD_ID = 123456789012345678  
         guild = discord.Object(id=GUILD_ID)
+
         synced = await bot.tree.sync(guild=guild)
-        print(f"✅ Slash commands synced to guild {GUILD_ID} ({len(synced)} cmds)")
+        print(f"✅ Slash commands synced to guild {GUILD_ID} ({len(synced)} commands)")
+
     except Exception as e:
         print(f"⚠️ Slash command sync failed: {e}")
+
 
 # -----------------------------------------------------
 # Main async runner
