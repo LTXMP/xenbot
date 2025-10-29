@@ -40,6 +40,7 @@ async def load_cogs():
             print(f"❌ Failed to load cog {filename}: {e}")
 
 # ----------------------------------------------------------
+# ----------------------------------------------------------
 # Event: Bot ready + Slash command sync
 # ----------------------------------------------------------
 @bot.event
@@ -56,12 +57,15 @@ async def on_ready():
 # ----------------------------------------------------------
 # Main bot start
 # ----------------------------------------------------------
-keep_alive()  # ✅ start Flask first
+keep_alive()  # ✅ start Flask first (keeps Render service awake)
 
 async def main():
     async with bot:
-        await load_cogs()
-        await bot.start(TOKEN)
+        await load_cogs()       # loads all your cogs
+            try:
+        await bot.start(TOKEN)  # logs into Discord
+    except Exception as e:
+        print(f"❌ Discord login failed: {e}")
 
 
 # ----------------------------------------------------------
@@ -69,3 +73,4 @@ async def main():
 # ----------------------------------------------------------
 if __name__ == "__main__":
     asyncio.run(main())
+
