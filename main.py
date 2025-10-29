@@ -14,6 +14,7 @@ intents = discord.Intents.all()
 
 # Supports slash + prefix commands
 bot = commands.Bot(command_prefix=",", intents=intents)
+bot.remove_command("help")  # disables default help to allow your custom one
 
 # -----------------------------------------------------
 # Load all cogs (async-safe)
