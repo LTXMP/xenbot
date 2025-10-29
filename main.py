@@ -21,12 +21,13 @@ bot.remove_command("help")  # disables default help to allow your custom one
 # -----------------------------------------------------
 async def load_cogs():
     for filename in os.listdir("./cogs"):
-        if filename.endswith(".py"):
-            try:
-                await bot.load_extension(f"cogs.{filename[:-3]}")
-                print(f"✅ Loaded cog: {filename}")
-            except Exception as e:
-                print(f"❌ Failed to load cog {filename}: {e}")
+        if not filename.endswith(".py") or filename.startswith("utils_"):
+            continue  # skip helper files
+        try:
+            await bot.load_extension(f"cogs.{filename[:-3]}")
+            print(f"✅ Loaded cog: {filename}")
+        except Exception as e:
+            print(f"❌ Failed to load cog {filename}: {e}")
 
 # -----------------------------------------------------
 # On Ready Event
